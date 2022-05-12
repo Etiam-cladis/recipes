@@ -9,7 +9,7 @@
             "defines": [],
             "compilerPath": "/usr/local/bin/gcc",
             "cStandard": "gnu17",
-            "intelliSenseMode": "linux-gcc-x64"
+        "intelliSenseMode": "linux-gcc-x64"
         }
     ],
     "version": 4

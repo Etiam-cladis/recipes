@@ -1,3 +1,6 @@
+#ifndef OBJECTPOOL_OBJECTPOOL_H
+#define OBJECTPOOL_OBJECTPOOL_H
+
 #include <memory>
 #include <vector>
 
@@ -41,3 +44,5 @@ private:
         // Uses to allocating and deallocating chunks;
         Allocator m_allocator;
 };
+
+#endif // OBJECTPOOL_OBJECTPOOL_H
