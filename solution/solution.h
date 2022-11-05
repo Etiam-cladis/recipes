@@ -5,27 +5,40 @@
 #include <string>
 #include <vector>
 
+#include "fraction.h"
+
+namespace solve
+{
 class solution
 {
 public:
     solution() = default;
-    solution(const std::vector<int>& input, int target);
-    solution(std::vector<int>&& input, int target);
-    solution(std::initializer_list<int> input, int target);
+    solution(const std::vector<solve::fraction>& input, int target = 24);
+    solution(std::vector<solve::fraction>&& input, int target = 24);
+
+    template <typename... Args>
+    solution(int target, Args&&... args) : m_target(target)
+    {
+        (m_input.emplace_back(std::forward<Args>(args)), ...);
+    }
+
     ~solution() = default;
 
-    std::vector<std::string> get_result();
+    // std::string get_result();
+
+    bool judge();
 
     bool valid_input();
-    void dfs(int current, std::string& str, int index);
+    bool backtrace(std::vector<solve::fraction>& input);
 
     solution(const solution&) = delete;
     solution& operator=(const solution&) = delete;
 
 private:
-    std::vector<int> m_input;
-    std::vector<std::string> m_result;
+    std::vector<solve::fraction> m_input;
+    // std::string m_result;
     int m_target;
 };
+}  // namespace solve
 
 #endif  // SOLUTION_H

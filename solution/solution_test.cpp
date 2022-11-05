@@ -5,40 +5,47 @@
 #include <algorithm>
 #include <vector>
 
-TEST(invalid_input, input)
+TEST(invalid_input, input1)
 {
-    solution test1({1, 2, 3, 3, 3}, 24);
+    solve::solution test1(24, 1, 2, 3, 3, 3);
     EXPECT_FALSE(test1.valid_input());
-
-    solution test2({1, 2, 3, 3}, 23);
+}
+TEST(invalid_input, input2)
+{
+    solve::solution test2(24, 1, 2, 3);
     EXPECT_FALSE(test2.valid_input());
-
-    solution test3({}, 23);
+}
+TEST(invalid_input, input3)
+{
+    solve::solution test3(23);
     EXPECT_FALSE(test3.valid_input());
+}
+TEST(invalid_input, input4)
+{
+    solve::solution test4;
+    EXPECT_FALSE(test4.valid_input());
 }
 
 TEST(valid_input, input)
 {
-    solution test1({1, 2, 3, 3}, 24);
+    solve::solution test1(24, 1, 2, 3, 3);
     EXPECT_TRUE(test1.valid_input());
 }
 
-TEST(correctness, test)
+TEST(correctness, test1)
 {
-    solution test1({3, 3, 3, 3}, 24);
-    std::vector<std::string> test1_result{"3*3*3-3"};
-    EXPECT_EQ(test1.get_result(), test1_result);
+    solve::solution test1(24, 3, 3, 3, 3);
+    EXPECT_TRUE(test1.judge());
+}
 
-    solution test2({9, 9, 9, 9}, 24);
-    EXPECT_EQ(test2.get_result(), std::vector<std::string>());
+TEST(correctness, test2)
+{
+    solve::solution test2(24, 9, 9, 9, 9);
+    EXPECT_FALSE(test2.judge());
+}
 
-    solution test3({24, 0, 1, 1}, 24);
-    std::vector<std::string> test3_result{"24*1*1",   "24*1/1",   "24+0*1*1", "24+0*1/1", "24+0+1-1",
-                                          "24+0-1+1", "24+0/1*1", "24+0/1/1", "24+1-1",   "24-0*1*1",
-                                          "24-0*1/1", "24-0+1-1", "24-0-1+1", "24-0/1*1", "24-0/1/1",
-                                          "24-1+1",   "24/1*1",   "24/1/1"};
-    std::sort(test3_result.begin(), test3_result.end());
-    std::vector<std::string> test3_sorted = test3.get_result();
-    std::sort(test3_sorted.begin(), test3_sorted.end());
-    EXPECT_EQ(test3_result, test3_sorted);
+TEST(correctness, test3)
+{
+    solve::solution test4(24, 3, 3, 8, 8);
+    EXPECT_TRUE(test4.judge());
 }

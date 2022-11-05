@@ -16,15 +16,28 @@ FetchContent_MakeAvailable(googletest)
 add_library(solution
     solution.cpp)
 
+add_library(fraction
+    fraction.cpp)
+
 enable_testing()
+
+add_executable(f_test
+    fraction_test.cpp)
+
+target_link_libraries(f_test
+    fraction
+    GTest::gtest_main
+)
 
 add_executable(s_test
     solution_test.cpp)
 
 target_link_libraries(s_test
     solution
+    fraction
     GTest::gtest_main
 )
 
 include(GoogleTest)
 gtest_discover_tests(s_test)
+gtest_discover_tests(f_test)
