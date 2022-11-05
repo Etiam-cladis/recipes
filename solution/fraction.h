@@ -143,7 +143,7 @@ public:
     }
 
 private:
-    void zero_or_value(int new_n, int new_d);
+    void zero_or_value(std::int64_t new_n, std::int64_t new_d);
     std::int64_t m_numerator;
     std::int64_t m_denominator;
 };
