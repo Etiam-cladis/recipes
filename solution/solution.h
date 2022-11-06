@@ -25,7 +25,6 @@ public:
     ~solution() = default;
 
     std::string get_result() const { return m_result; }
-    std::string& set_result() { return m_result; }
 
     bool judge();
 
