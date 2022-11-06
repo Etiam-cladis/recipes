@@ -24,19 +24,20 @@ public:
 
     ~solution() = default;
 
-    // std::string get_result();
+    std::string get_result() const { return m_result; }
+    std::string& set_result() { return m_result; }
 
     bool judge();
 
     bool valid_input();
-    bool backtrace(std::vector<solve::fraction>& input);
+    solve::fraction backtrace(int left, int right, int val);
 
     solution(const solution&) = delete;
     solution& operator=(const solution&) = delete;
 
 private:
     std::vector<solve::fraction> m_input;
-    // std::string m_result;
+    std::string m_result;
     int m_target;
 };
 }  // namespace solve

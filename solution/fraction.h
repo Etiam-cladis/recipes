@@ -17,25 +17,17 @@ public:
                   std::is_integral<T>::value && !std::is_same<bool, T>::value
                   && !std::is_same<char, T>::value
                   && !std::is_same<signed char, T>::value
-                  && !std::is_same<unsigned char, T>::value>::type>
+                  && !std::is_same<unsigned char, T>::value
+                  && !std::is_same<wchar_t, T>::value>::type>
     fraction(T numerator, T denominator = 1)
     {
         if (static_cast<std::int64_t>(denominator) == 0)
         {
-            throw std::overflow_error("Divide by zero exception");
+            throw std::overflow_error("Denominator cannot be zero");
         }
-        std::int64_t g = fraction::gcd(static_cast<std::int64_t>(numerator),
-                                       static_cast<std::int64_t>(denominator));
-        if (g == 0 || numerator == 0)
-        {
-            m_numerator = 0;
-            m_denominator = 0;
-        }
-        else
-        {
-            m_numerator = numerator / g;
-            m_denominator = denominator / g;
-        }
+
+        m_numerator = numerator;
+        m_denominator = denominator;
     }
 
     fraction(const fraction& rhs)
@@ -46,19 +38,21 @@ public:
     fraction(fraction&& rhs) noexcept
     {
         m_numerator = std::exchange(rhs.m_numerator, 0);
-        m_denominator = std::exchange(rhs.m_denominator, 0);
+        m_denominator = std::exchange(rhs.m_denominator, 1);
     }
 
     fraction& operator=(fraction rhs)
     {
-        std::swap(m_numerator, rhs.m_numerator);
-        std::swap(m_denominator, m_denominator);
+        m_numerator = rhs.m_numerator;
+        m_denominator = rhs.m_denominator;
         return *this;
     }
     ~fraction() = default;
 
     std::int64_t num() const { return m_numerator; };
     std::int64_t den() const { return m_denominator; };
+
+    std::string to_string() const;
     fraction& operator++()
     {
         m_numerator += m_denominator;
@@ -109,23 +103,28 @@ public:
 
     friend bool operator<(const fraction& lhs, const fraction& rhs)
     {
-        return (lhs.num() * rhs.den() - rhs.num() - rhs.den()) < 0;
+        return (lhs.num() * rhs.den() - rhs.num() * lhs.den()) < 0;
     }
     friend bool operator<=(const fraction& lhs, const fraction& rhs)
     {
-        return (lhs.num() * rhs.den() - rhs.num() - rhs.den()) <= 0;
+        return (lhs.num() * rhs.den() - rhs.num() * lhs.den()) <= 0;
     }
     friend bool operator>(const fraction& lhs, const fraction& rhs)
     {
-        return (lhs.num() * rhs.den() - rhs.num() - rhs.den()) > 0;
+        return (lhs.num() * rhs.den() - rhs.num() * lhs.den()) > 0;
     }
     friend bool operator>=(const fraction& lhs, const fraction& rhs)
     {
-        return (lhs.num() * rhs.den() - rhs.num() - rhs.den()) >= 0;
+        return (lhs.num() * rhs.den() - rhs.num() * lhs.den()) >= 0;
     }
     friend bool operator==(const fraction& lhs, const fraction& rhs)
     {
-        return lhs.num() == rhs.num() && lhs.den() == rhs.den();
+        std::int64_t gcd_lhs =
+            fraction::gcd(lhs.m_numerator, lhs.m_denominator);
+        std::int64_t gcd_rhs =
+            fraction::gcd(rhs.m_numerator, rhs.m_denominator);
+        return lhs.m_numerator / gcd_lhs == rhs.m_numerator / gcd_rhs
+               && lhs.m_denominator / gcd_lhs == rhs.m_denominator / gcd_rhs;
     }
     friend bool operator!=(const fraction& lhs, const fraction& rhs)
     {
@@ -134,7 +133,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream& out, const fraction& rhs)
     {
-        return out << rhs.num() << '/' << rhs.den();
+        return out << rhs.to_string();
     }
 
     static std::int64_t gcd(std::int64_t a, std::int64_t b)
@@ -143,7 +142,6 @@ public:
     }
 
 private:
-    void zero_or_value(std::int64_t new_n, std::int64_t new_d);
     std::int64_t m_numerator;
     std::int64_t m_denominator;
 };

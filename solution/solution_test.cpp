@@ -36,6 +36,7 @@ TEST(correctness, test1)
 {
     solve::solution test1(24, 3, 3, 3, 3);
     EXPECT_TRUE(test1.judge());
+    std::cout << test1.get_result() << std::endl;
 }
 
 TEST(correctness, test2)
@@ -46,6 +47,7 @@ TEST(correctness, test2)
 
 TEST(correctness, test3)
 {
-    solve::solution test4(24, 3, 3, 8, 8);
-    EXPECT_TRUE(test4.judge());
+    solve::solution test3(24, 3, 3, 8, 8);
+    EXPECT_TRUE(test3.judge());
+    std::cout << test3.get_result() << std::endl;
 }

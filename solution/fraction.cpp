@@ -3,69 +3,53 @@
 namespace solve
 {
 
-void fraction::zero_or_value(std::int64_t new_n, std::int64_t new_d)
+std::string fraction::to_string() const
 {
-    std::int64_t g = fraction::gcd(new_n, new_d);
-    if (new_n == 0)
+    std::int64_t g = fraction::gcd(m_numerator, m_denominator);
+    std::string ret{};
+    ret += std::to_string(m_numerator / g);
+    if (m_denominator != 1 && m_numerator != 0)
     {
-        m_numerator = 0;
-        m_denominator = 0;
+        ret += '/';
+        ret += std::to_string(m_denominator / g);
     }
-    else
-    {
-        m_numerator = new_n / g;
-        m_denominator = new_d / g;
-    }
+    return ret;
 }
+
 fraction& fraction::operator+=(const fraction& rhs)
 {
-    std::int64_t new_n =
+    m_numerator =
         m_numerator * rhs.m_denominator + rhs.m_numerator * m_denominator;
-    std::int64_t new_d = m_denominator * rhs.m_denominator;
 
-    zero_or_value(new_n, new_d);
+    m_denominator = m_denominator * rhs.m_denominator;
 
     return *this;
 }
 
 fraction& fraction::operator-=(const fraction& rhs)
 {
-    std::int64_t new_n =
+    m_numerator =
         m_numerator * rhs.m_denominator - rhs.m_numerator * m_denominator;
-    std::int64_t new_d = m_denominator * rhs.m_denominator;
-
-    zero_or_value(new_n, new_d);
+    m_denominator = m_denominator * rhs.m_denominator;
 
     return *this;
 }
 fraction& fraction::operator*=(const fraction& rhs)
 {
-    std::int64_t new_n = m_numerator * rhs.m_numerator;
-    std::int64_t new_d = m_denominator * rhs.m_denominator;
-
-    zero_or_value(new_n, new_d);
+    m_numerator = m_numerator * rhs.m_numerator;
+    m_denominator = m_denominator * rhs.m_denominator;
 
     return *this;
 }
 
 fraction& fraction::operator/=(const fraction& rhs)
 {
-    if (*this == 0)
-    {
-        m_numerator = 0;
-        m_denominator = 0;
-    }
-    else
-    {
-        std::int64_t g = fraction::gcd(m_numerator * rhs.m_denominator,
-                                       m_denominator * rhs.m_numerator);
-        if (g == 0) { throw std::overflow_error("Divide by zero exception"); }
-        else
-        {
-            m_numerator = m_numerator * rhs.m_denominator / g;
-            m_denominator = m_denominator * rhs.m_numerator / g;
-        }
-    }
+    std::int64_t new_n = m_numerator * rhs.m_denominator;
+    std::int64_t new_d = m_denominator * rhs.m_numerator;
+    if (new_d == 0) { throw std::overflow_error("Divide by zero exception"); }
+
+    m_numerator = new_n;
+    m_denominator = new_d;
 
     return *this;
 }

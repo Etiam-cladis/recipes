@@ -1,72 +1,117 @@
 #include "solution.h"
 
+#include <functional>
+#include <unordered_map>
+
 #include "fraction.h"
 
 namespace solve
 {
+enum OP
+{
+    ADD = 0,
+    MULTIPLY,
+    SUBTRACT,
+    DIVIDE
+};
 
-static constexpr int ADD = 0, MULTIPLY = 1, SUBTRACT = 2, DIVIDE = 3;
+std::unordered_map<OP, char> op_to_char{
+    {     OP::ADD, '+'},
+    {OP::MULTIPLY, '*'},
+    {OP::SUBTRACT, '-'},
+    {  OP::DIVIDE, '/'}
+};
 
-solution::solution(const std::vector<solve::fraction>& input, int target)
-    : m_input(input), m_target(target)
+void make_result(solve::solution& s, const solve::fraction& a, const solve::fraction& b, OP op)
+{
+    if (!s.get_result().empty())
+    {
+        s.set_result() = '(' + s.get_result() + op_to_char[op] + b.to_string() + ')';
+    }
+    else { s.set_result() = '(' + a.to_string() + op_to_char[op] + b.to_string() + ')'; }
+}
+
+std::vector<std::function<solve::fraction(solve::solution&, solve::fraction a, solve::fraction b)>> ops{
+    [](solution& s, solve::fraction a, solve::fraction b) -> solve::fraction {
+        make_result(s, a, b, OP::ADD);
+        return a + b;
+    },
+    [](solution& s, solve::fraction a, solve::fraction b) -> solve::fraction {
+        make_result(s, a, b, OP::MULTIPLY);
+        return a * b;
+    },
+    [](solution& s, solve::fraction a, solve::fraction b) -> solve::fraction {
+        make_result(s, a, b, OP::SUBTRACT);
+        return a - b;
+    },
+    [](solution& s, solve::fraction a, solve::fraction b) -> solve::fraction {
+        make_result(s, b, a, OP::SUBTRACT);
+        return b - a;
+    },
+    [](solution& s, solve::fraction a, solve::fraction b) -> solve::fraction {
+        make_result(s, a, b, OP::DIVIDE);
+        return a / b;
+    },
+    [](solution& s, solve::fraction a, solve::fraction b) -> solve::fraction {
+        make_result(s, b, a, OP::DIVIDE);
+        return b / a;
+    },
+};
+
+solution::solution(const std::vector<solve::fraction>& input, int target) : m_input(input), m_target(target)
 {}
 
 solution::solution(std::vector<solve::fraction>&& input, int target)
     : m_input(std::move(input)), m_target(target)
 {}
 
-bool solution::backtrace(std::vector<solve::fraction>& input)
+solve::fraction solution::backtrace(int left, int right, int val)
 {
-    if (input.size() == 0) { return false; }
-    if (input.size() == 1) { return input[0] == 24; }
-
-    int size = input.size();
-    for (int i = 0; i < size; ++i)
+    for (int i = left; i < right - 1; ++i)
     {
-        for (int j = 0; j < size; ++j)
+        for (int j = left + 1; j < right; ++j)
         {
-            if (i != j)
-            {
-                std::vector<solve::fraction> temp =
-                    std::vector<solve::fraction>();
-                for (int k = 0; k < size; ++k)
-                {
-                    if (k != i && k != j) { temp.emplace_back(input[k]); }
-                }
+            std::string old = m_result;
+            std::swap(m_input[i], m_input[left]);
+            std::swap(m_input[j], m_input[left + 1]);
 
-                for (int op = 0; op < 4; ++op)
+            for (auto op : ops)
+            {
+                try
                 {
-                    if (op < 2 && i > j) { continue; }
-                    if (op == ADD) { temp.emplace_back(input[i] + input[j]); }
-                    else if (op == MULTIPLY)
+                    auto ret = op(*this, m_input[left], m_input[left + 1]);
+                    if (right - left > 2)
                     {
-                        temp.emplace_back(input[i] * input[j]);
+                        auto ori = m_input[left + 1];
+                        m_input[left + 1] = ret;
+                        ret = backtrace(left + 1, right, val);
+                        m_input[left + 1] = ori;
                     }
-                    else if (op == SUBTRACT)
+                    if (ret == val)
                     {
-                        temp.emplace_back(input[i] - input[j]);
+                        std::swap(m_input[j], m_input[left + 1]);
+                        std::swap(m_input[i], m_input[left]);
+                        return ret;
                     }
-                    else if (op == DIVIDE)
-                    {
-                        if (input[j] == 0) { continue; }
-                        temp.emplace_back(input[i] / input[j]);
-                    }
-                    if (backtrace(temp)) { return true; }
-                    temp.pop_back();
+                    m_result = old;
+                } catch (const std::overflow_error& e)
+                {
+                    m_result = old;
                 }
             }
+            std::swap(m_input[j], m_input[left + 1]);
+            std::swap(m_input[i], m_input[left]);
         }
     }
-    return false;
+
+    return 0;
 }
-// std::string solution::get_result() { return m_result; }
 
 bool solution::judge()
 {
     if (!valid_input()) { return false; }
 
-    std::vector<solve::fraction> input(m_input);
-    return backtrace(input);
+    return backtrace(0, m_input.size(), m_target) == m_target;
 }
 
 bool solution::valid_input()
